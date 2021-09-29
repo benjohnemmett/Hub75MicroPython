@@ -15,11 +15,11 @@ class Hub75SpiConfiguration:
         self.E = 12
 
         self.R1 = 2
-        self.G1 = 15
-        self.B1 = 4
+        self.B1 = 15
+        self.G1 = 4
         self.R2 = 16
-        self.G2 = 27
-        self.B2 = 17
+        self.B2 = 27
+        self.G2 = 17
 
         self.CLK = 22
         self.LAT = 26
@@ -36,12 +36,6 @@ class Hub75Spi:
 
     def __init__(self, config):
         self.config = config
-        #pR1 = Pin(R1, Pin.OUT, value=0)
-        self.pG1 = Pin(config.G1, Pin.OUT, value=0)
-        self.pB1 = Pin(config.B1, Pin.OUT, value=0)
-        self.pR2 = Pin(config.R2, Pin.OUT, value=0)
-        self.pG2 = Pin(config.G2, Pin.OUT, value=0)
-        self.pB2 = Pin(config.B2, Pin.OUT, value=0)
 
         self.pLat = Pin(config.LAT, Pin.OUT)
         self.pOe = Pin(config.OE, Pin.OUT)
@@ -59,6 +53,10 @@ class Hub75Spi:
 
         self.spiR1 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.R1), miso=Pin(config.miso))
         self.spiR2 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.R2), miso=Pin(config.miso))
+        self.spiG1 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.G1), miso=Pin(config.miso))
+        self.spiG2 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.G2), miso=Pin(config.miso))
+        self.spiB1 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.B1), miso=Pin(config.miso))
+        self.spiB2 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.B2), miso=Pin(config.miso))
 
         self.data = [bytearray(8) for x in range(32)]
 
@@ -84,7 +82,7 @@ class Hub75Spi:
         else:
             self.pE.off()
 
-    def DisplayTopHalf(self):
+    def DisplayTopHalfRed(self):
         for row in range(self.config.HALF_ROWS):
             # shift in data
             buf = self.data[row]
@@ -99,7 +97,37 @@ class Hub75Spi:
             
         self.spiR1.write(bytearray(8))
 
-    def DisplayBottomHalf(self):
+    def DisplayTopHalfGreen(self):
+        for row in range(self.config.HALF_ROWS):
+            # shift in data
+            buf = self.data[row]
+            self.spiG1.write(buf)
+            self.pOe.on() # disable
+
+            self.SetRowSelect(row)
+
+            self.pLat.on()
+            self.pLat.off()
+            self.pOe.off() # enable
+            
+        self.spiG1.write(bytearray(8))
+        
+    def DisplayTopHalfBlue(self):
+        for row in range(self.config.HALF_ROWS):
+            # shift in data
+            buf = self.data[row]
+            self.spiB1.write(buf)
+            self.pOe.on() # disable
+
+            self.SetRowSelect(row)
+
+            self.pLat.on()
+            self.pLat.off()
+            self.pOe.off() # enable
+            
+        self.spiB1.write(bytearray(8))
+
+    def DisplayBottomHalfRed(self):
         for row in range(self.config.HALF_ROWS, self.config.ROWS):
             # shift in data
             buf = self.data[row]
@@ -113,10 +141,44 @@ class Hub75Spi:
             self.pOe.off() # enable
 
         self.spiR2.write(bytearray(8))
+        
+    def DisplayBottomHalfGreen(self):
+        for row in range(self.config.HALF_ROWS, self.config.ROWS):
+            # shift in data
+            buf = self.data[row]
+            self.spiG2.write(buf)
+            self.pOe.on() # disable
+
+            self.SetRowSelect(row % self.config.HALF_ROWS)
+
+            self.pLat.on()
+            self.pLat.off()
+            self.pOe.off() # enable
+
+        self.spiG2.write(bytearray(8))
+
+    def DisplayBottomHalfBlue(self):
+        for row in range(self.config.HALF_ROWS, self.config.ROWS):
+            # shift in data
+            buf = self.data[row]
+            self.spiB2.write(buf)
+            self.pOe.on() # disable
+
+            self.SetRowSelect(row % self.config.HALF_ROWS)
+
+            self.pLat.on()
+            self.pLat.off()
+            self.pOe.off() # enable
+
+        self.spiB2.write(bytearray(8))
 
     def DisplayData(self):
-        self.DisplayTopHalf()
-        self.DisplayBottomHalf()
+        self.DisplayTopHalfRed()
+        self.DisplayTopHalfGreen()
+        self.DisplayTopHalfBlue()
+        self.DisplayBottomHalfRed()
+        self.DisplayBottomHalfGreen()
+        self.DisplayBottomHalfBlue()
 
     def SetPixelValue(self, row, col):
         cIndex = col // 8
@@ -129,4 +191,5 @@ class Hub75Spi:
         byteIndex = 7 - (col % 8)
 
         self.data[row][cIndex] &= ~(1 << byteIndex)
+
 
