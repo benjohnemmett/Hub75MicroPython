@@ -59,7 +59,9 @@ class Hub75Spi:
         self.spiB2 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.B2), miso=Pin(config.miso))
 
         self.data = [bytearray(8) for x in range(32)]
-
+        
+        self.dirtyBytes = {}
+        
     def SetRowSelect(self, row):
         if row & 1:
             self.pA.on()
@@ -179,17 +181,39 @@ class Hub75Spi:
         self.DisplayBottomHalfRed()
         self.DisplayBottomHalfGreen()
         self.DisplayBottomHalfBlue()
+        
 
     def SetPixelValue(self, row, col):
+        if (self.IsOutOfBounds(row, col)):
+            return
+        
         cIndex = col // 8
         byteIndex = 7 - (col % 8)
 
         self.data[row][cIndex] |= (1 << byteIndex)
+        
+        self.dirtyBytes[(row,col//8)] = 1
     
     def ClearPixelValue(self, row, col):
+        if (self.IsOutOfBounds(row, col)):
+            return
+        
         cIndex = col // 8
         byteIndex = 7 - (col % 8)
 
         self.data[row][cIndex] &= ~(1 << byteIndex)
+    
+    def ClearDirtyBytes(self):
+        for index in self.dirtyBytes:
+            self.data[index[0]][index[1]] = 0
+    
+    def SetPixels(self, row, col, array):
+        for r in range(len(array)):
+            for c in range(len(array[0])):
+                if array[r][c]:
+                    self.SetPixelValue(row + r, col + c)
+    
+    def IsOutOfBounds(self, row, col):
+        return (row < 0 or row >= self.config.ROWS or col < 0 or col >= self.config.COLS)
 
 
