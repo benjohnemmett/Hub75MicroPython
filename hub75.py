@@ -32,6 +32,9 @@ class Hub75SpiConfiguration:
         # not really used. Shared for top & bottom half of matrix.
         self.miso = 13
         self.spiBaudRate = 1000000
+        
+        self.illuminationTimeMicroseconds = 0
+
 
 class Hub75Spi:
 
@@ -65,6 +68,7 @@ class Hub75Spi:
         
         self.dirtyBytes = {}
         
+        
     def SetRowSelect(self, row):
         if row & 1:
             self.pA.on()
@@ -87,7 +91,8 @@ class Hub75Spi:
         else:
             self.pE.off()
 
-    def DisplayTopHalfRed(self):
+
+    def DisplayTopHalf(self):
         for row in range(self.config.HALF_ROWS):
             # shift in data
             buf = self.redData[row]
@@ -99,40 +104,33 @@ class Hub75Spi:
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
+            time.sleep_us(self.config.illuminationTimeMicroseconds)
             
-        self.spiR1.write(bytearray(8))
-
-    def DisplayTopHalfGreen(self):
-        for row in range(self.config.HALF_ROWS):
             # shift in data
             buf = self.greenData[row]
             self.spiG1.write(buf)
             self.pOe.on() # disable
 
-            self.SetRowSelect(row)
-
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
+            time.sleep_us(self.config.illuminationTimeMicroseconds)
             
-        self.spiG1.write(bytearray(8))
-        
-    def DisplayTopHalfBlue(self):
-        for row in range(self.config.HALF_ROWS):
             # shift in data
             buf = self.blueData[row]
             self.spiB1.write(buf)
             self.pOe.on() # disable
 
-            self.SetRowSelect(row)
-
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
+            time.sleep_us(self.config.illuminationTimeMicroseconds)
+            
             
         self.spiB1.write(bytearray(8))
 
-    def DisplayBottomHalfRed(self):
+
+    def DisplayBottomHalf(self):
         for row in range(self.config.HALF_ROWS, self.config.ROWS):
             # shift in data
             buf = self.redData[row]
@@ -144,46 +142,32 @@ class Hub75Spi:
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
-
-        self.spiR2.write(bytearray(8))
-        
-    def DisplayBottomHalfGreen(self):
-        for row in range(self.config.HALF_ROWS, self.config.ROWS):
-            # shift in data
+            time.sleep_us(self.config.illuminationTimeMicroseconds)
+            
             buf = self.greenData[row]
             self.spiG2.write(buf)
             self.pOe.on() # disable
 
-            self.SetRowSelect(row % self.config.HALF_ROWS)
-
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
-
-        self.spiG2.write(bytearray(8))
-
-    def DisplayBottomHalfBlue(self):
-        for row in range(self.config.HALF_ROWS, self.config.ROWS):
-            # shift in data
+            time.sleep_us(self.config.illuminationTimeMicroseconds)
+                        
             buf = self.blueData[row]
             self.spiB2.write(buf)
             self.pOe.on() # disable
 
-            self.SetRowSelect(row % self.config.HALF_ROWS)
-
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
+            time.sleep_us(self.config.illuminationTimeMicroseconds)
 
         self.spiB2.write(bytearray(8))
 
+
     def DisplayData(self):
-        self.DisplayTopHalfRed()
-        self.DisplayTopHalfGreen()
-        self.DisplayTopHalfBlue()
-        self.DisplayBottomHalfRed()
-        self.DisplayBottomHalfGreen()
-        self.DisplayBottomHalfBlue()
+        self.DisplayTopHalf()
+        self.DisplayBottomHalf()
         
 
     def SetPixelValue(self, row, col, val):
@@ -202,15 +186,6 @@ class Hub75Spi:
         
         self.dirtyBytes[(row,col//8)] = 1
     
-    def ClearPixelValue(self, row, col):
-        if (self.IsOutOfBounds(row, col)):
-            return
-        
-        cIndex = col // 8
-        byteIndex = 7 - (col % 8)
-
-        self.redData[row][cIndex] &= ~(1 << byteIndex)
-    
     def ClearDirtyBytes(self):
         for index in self.dirtyBytes:
             self.redData[index[0]][index[1]] = 0
@@ -227,4 +202,3 @@ class Hub75Spi:
     
     def IsOutOfBounds(self, row, col):
         return (row < 0 or row >= self.config.ROWS or col < 0 or col >= self.config.COLS)
-
