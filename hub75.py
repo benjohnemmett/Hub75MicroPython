@@ -1,5 +1,7 @@
-from machine import Pin, SoftSPI
-import time
+from machine import Pin, SoftSPI, freq
+from time import sleep_us
+
+freq(240000000)
 
 class Hub75SpiConfiguration:
 
@@ -31,9 +33,9 @@ class Hub75SpiConfiguration:
 
         # not really used. Shared for top & bottom half of matrix.
         self.miso = 13
-        self.spiBaudRate = 1000000
+        self.spiBaudRate = 2500000
         
-        self.illuminationTimeMicroseconds = 0
+        self.illuminationTimeMicroseconds = 10
 
 
 class Hub75Spi:
@@ -66,7 +68,7 @@ class Hub75Spi:
         self.greenData = [bytearray(8) for x in range(32)]
         self.blueData = [bytearray(8) for x in range(32)]
         
-        self.dirtyBytes = {}
+        self.dirtyBytes = []
         
         
     def SetRowSelect(self, row):
@@ -104,7 +106,7 @@ class Hub75Spi:
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
-            time.sleep_us(self.config.illuminationTimeMicroseconds)
+            sleep_us(self.config.illuminationTimeMicroseconds)
             
             # shift in data
             buf = self.greenData[row]
@@ -114,7 +116,7 @@ class Hub75Spi:
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
-            time.sleep_us(self.config.illuminationTimeMicroseconds)
+            sleep_us(self.config.illuminationTimeMicroseconds)
             
             # shift in data
             buf = self.blueData[row]
@@ -124,7 +126,7 @@ class Hub75Spi:
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
-            time.sleep_us(self.config.illuminationTimeMicroseconds)
+            sleep_us(self.config.illuminationTimeMicroseconds)
             
             
         self.spiB1.write(bytearray(8))
@@ -142,7 +144,7 @@ class Hub75Spi:
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
-            time.sleep_us(self.config.illuminationTimeMicroseconds)
+            sleep_us(self.config.illuminationTimeMicroseconds)
             
             buf = self.greenData[row]
             self.spiG2.write(buf)
@@ -151,7 +153,7 @@ class Hub75Spi:
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
-            time.sleep_us(self.config.illuminationTimeMicroseconds)
+            sleep_us(self.config.illuminationTimeMicroseconds)
                         
             buf = self.blueData[row]
             self.spiB2.write(buf)
@@ -160,7 +162,7 @@ class Hub75Spi:
             self.pLat.on()
             self.pLat.off()
             self.pOe.off() # enable
-            time.sleep_us(self.config.illuminationTimeMicroseconds)
+            sleep_us(self.config.illuminationTimeMicroseconds)
 
         self.spiB2.write(bytearray(8))
 
@@ -184,7 +186,7 @@ class Hub75Spi:
         if val & 1:
             self.blueData[row][cIndex] |= (1 << byteIndex)
         
-        self.dirtyBytes[(row,col//8)] = 1
+        self.dirtyBytes.append((row,col//8))
     
     def ClearDirtyBytes(self):
         for index in self.dirtyBytes:
@@ -192,7 +194,7 @@ class Hub75Spi:
             self.greenData[index[0]][index[1]] = 0
             self.blueData[index[0]][index[1]] = 0
             
-        self.dirtyBytes = {}
+        self.dirtyBytes = []
     
     def SetPixels(self, row, col, array):
         for r in range(len(array)):
@@ -202,3 +204,4 @@ class Hub75Spi:
     
     def IsOutOfBounds(self, row, col):
         return (row < 0 or row >= self.config.ROWS or col < 0 or col >= self.config.COLS)
+
