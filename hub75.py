@@ -30,7 +30,8 @@ class Hub75SpiConfiguration:
         self.HALF_ROWS = 16
 
         # not really used. Shared for top & bottom half of matrix.
-        self.miso = 13 
+        self.miso = 13
+        self.spiBaudRate = 1000000
 
 class Hub75Spi:
 
@@ -50,15 +51,17 @@ class Hub75Spi:
         self.pC.off()
         self.pD.off()
         self.pE.off()
+        
+        self.spiR1 = SoftSPI(baudrate=config.spiBaudRate, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.R1), miso=Pin(config.miso))
+        self.spiR2 = SoftSPI(baudrate=config.spiBaudRate, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.R2), miso=Pin(config.miso))
+        self.spiG1 = SoftSPI(baudrate=config.spiBaudRate, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.G1), miso=Pin(config.miso))
+        self.spiG2 = SoftSPI(baudrate=config.spiBaudRate, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.G2), miso=Pin(config.miso))
+        self.spiB1 = SoftSPI(baudrate=config.spiBaudRate, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.B1), miso=Pin(config.miso))
+        self.spiB2 = SoftSPI(baudrate=config.spiBaudRate, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.B2), miso=Pin(config.miso))
 
-        self.spiR1 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.R1), miso=Pin(config.miso))
-        self.spiR2 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.R2), miso=Pin(config.miso))
-        self.spiG1 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.G1), miso=Pin(config.miso))
-        self.spiG2 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.G2), miso=Pin(config.miso))
-        self.spiB1 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.B1), miso=Pin(config.miso))
-        self.spiB2 = SoftSPI(baudrate=1000000, polarity=1, phase=0, sck=Pin(config.CLK), mosi=Pin(config.B2), miso=Pin(config.miso))
-
-        self.data = [bytearray(8) for x in range(32)]
+        self.redData = [bytearray(8) for x in range(32)]
+        self.greenData = [bytearray(8) for x in range(32)]
+        self.blueData = [bytearray(8) for x in range(32)]
         
         self.dirtyBytes = {}
         
@@ -87,7 +90,7 @@ class Hub75Spi:
     def DisplayTopHalfRed(self):
         for row in range(self.config.HALF_ROWS):
             # shift in data
-            buf = self.data[row]
+            buf = self.redData[row]
             self.spiR1.write(buf)
             self.pOe.on() # disable
 
@@ -102,7 +105,7 @@ class Hub75Spi:
     def DisplayTopHalfGreen(self):
         for row in range(self.config.HALF_ROWS):
             # shift in data
-            buf = self.data[row]
+            buf = self.greenData[row]
             self.spiG1.write(buf)
             self.pOe.on() # disable
 
@@ -117,7 +120,7 @@ class Hub75Spi:
     def DisplayTopHalfBlue(self):
         for row in range(self.config.HALF_ROWS):
             # shift in data
-            buf = self.data[row]
+            buf = self.blueData[row]
             self.spiB1.write(buf)
             self.pOe.on() # disable
 
@@ -132,7 +135,7 @@ class Hub75Spi:
     def DisplayBottomHalfRed(self):
         for row in range(self.config.HALF_ROWS, self.config.ROWS):
             # shift in data
-            buf = self.data[row]
+            buf = self.redData[row]
             self.spiR2.write(buf)
             self.pOe.on() # disable
 
@@ -147,7 +150,7 @@ class Hub75Spi:
     def DisplayBottomHalfGreen(self):
         for row in range(self.config.HALF_ROWS, self.config.ROWS):
             # shift in data
-            buf = self.data[row]
+            buf = self.greenData[row]
             self.spiG2.write(buf)
             self.pOe.on() # disable
 
@@ -162,7 +165,7 @@ class Hub75Spi:
     def DisplayBottomHalfBlue(self):
         for row in range(self.config.HALF_ROWS, self.config.ROWS):
             # shift in data
-            buf = self.data[row]
+            buf = self.blueData[row]
             self.spiB2.write(buf)
             self.pOe.on() # disable
 
@@ -183,14 +186,19 @@ class Hub75Spi:
         self.DisplayBottomHalfBlue()
         
 
-    def SetPixelValue(self, row, col):
+    def SetPixelValue(self, row, col, val):
         if (self.IsOutOfBounds(row, col)):
             return
         
         cIndex = col // 8
         byteIndex = 7 - (col % 8)
 
-        self.data[row][cIndex] |= (1 << byteIndex)
+        if val & 4:
+            self.redData[row][cIndex] |= (1 << byteIndex)
+        if val & 2:
+            self.greenData[row][cIndex] |= (1 << byteIndex)
+        if val & 1:
+            self.blueData[row][cIndex] |= (1 << byteIndex)
         
         self.dirtyBytes[(row,col//8)] = 1
     
@@ -201,19 +209,22 @@ class Hub75Spi:
         cIndex = col // 8
         byteIndex = 7 - (col % 8)
 
-        self.data[row][cIndex] &= ~(1 << byteIndex)
+        self.redData[row][cIndex] &= ~(1 << byteIndex)
     
     def ClearDirtyBytes(self):
         for index in self.dirtyBytes:
-            self.data[index[0]][index[1]] = 0
+            self.redData[index[0]][index[1]] = 0
+            self.greenData[index[0]][index[1]] = 0
+            self.blueData[index[0]][index[1]] = 0
+            
+        self.dirtyBytes = {}
     
     def SetPixels(self, row, col, array):
         for r in range(len(array)):
             for c in range(len(array[0])):
                 if array[r][c]:
-                    self.SetPixelValue(row + r, col + c)
+                    self.SetPixelValue(row + r, col + c, array[r][c])
     
     def IsOutOfBounds(self, row, col):
         return (row < 0 or row >= self.config.ROWS or col < 0 or col >= self.config.COLS)
-
 
