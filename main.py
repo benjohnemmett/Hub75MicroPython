@@ -24,12 +24,12 @@ while True:
     matrix.SetPixels(row, col, earth)
     
     col += dcol
-    if (col > (config.COLS - 1 - 8)) or (col < 0):
+    if (col > (config.MatrixColumns - 1 - 8)) or (col < 0):
         dcol = -1 * dcol
         col += dcol
         
     row += drow
-    if (row > (config.ROWS - 1 - 8)) or (row < 0):
+    if (row > (config.MatrixRows - 1 - 8)) or (row < 0):
         drow = -1 * drow
         row += drow
     
