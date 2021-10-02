@@ -69,26 +69,11 @@ class Hub75Spi:
         
         
     def SetRowSelect(self, row):
-        if row & 1:
-            self.LineSelectAPin.on()
-        else:
-            self.LineSelectAPin.off()
-        if row & 2:
-            self.LineSelectBPin.on()
-        else:
-            self.LineSelectBPin.off()
-        if row & 4:
-            self.LineSelectCPin.on()
-        else:
-            self.LineSelectCPin.off()
-        if row & 8:
-            self.LineSelectDPin.on()
-        else:
-            self.LineSelectDPin.off()
-        if row & 16:
-            self.LineSelectEPin.on()
-        else:
-            self.LineSelectEPin.off()
+        self.LineSelectAPin.value(row & 1)
+        self.LineSelectBPin.value(row & 2)
+        self.LineSelectCPin.value(row & 4)
+        self.LineSelectDPin.value(row & 8)
+        self.LineSelectEPin.value(row & 16)
 
 
     def DisplayTopHalf(self):
