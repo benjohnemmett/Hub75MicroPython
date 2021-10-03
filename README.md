@@ -26,3 +26,34 @@ SPI is able to shift in data much quicker, however each row and color channel ar
 
 The SPI approach also has drawbacks, for example the picture is a bit dim normally. 
 This can be improved by increasing the illumination time on each row, however that will reduce the framerate and may cause filcker.
+
+## Color Mapping
+This library supports 3-bit color. Pixel values can be set individually with `SetPixelValue(row, col, value)` or as a group with `SetPixels(self, top, left, image)`. Where `value` is a bitmapped value as shown in the table below, and `image` is a 2d list of bitmapped values. 
+
+| Color | Binary Value | Decimal Value |
+|-------|--------------|--------------|
+| Black   | 0b000 | 0 |
+| Blue    | 0b001 | 1 |
+| Green   | 0b010 | 2 |
+| Cyan    | 0b011 | 3 |
+| Red     | 0b100 | 4 |
+| Magenta | 0b101 | 5 |
+| Yellow  | 0b110 | 6 |
+| White   | 0b111 | 7 |
+
+## Example
+This example displays the Python logo imported from logo.py.
+````
+import hub75
+from logo import logo
+
+config = hub75.Hub75SpiConfiguration()
+matrix = hub75.Hub75Spi(config)
+
+# Show Python Logo
+matrix.SetPixels(0, 16, logo)
+    
+while True:
+    matrix.DisplayData()
+````
+
