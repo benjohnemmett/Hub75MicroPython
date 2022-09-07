@@ -1,6 +1,8 @@
 # Hub75MicroPython
 Library for ESP32 MicroPython to drive an LED matrix using the Hub75 protocol.
 
+Details here -> https://notes.benjemmett.com/archives/114
+
 ## Setup
 This project is based on the Hub75 Blaster PCB from this Hackerbox (https://hackerboxes.com/collections/past-hackerboxes/products/hackerbox-0065-realtime).
 It can easily be reconfigured to use custom pins with the Hub75SpiConfiguration class. 
