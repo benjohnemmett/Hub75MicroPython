@@ -1,16 +1,21 @@
 import hub75
+import matrixdata
 from logo import logo
 from planets import earth, saturn
 import bouncer
 
+ROW_SIZE = 32
+COL_SIZE = 64
+
 config = hub75.Hub75SpiConfiguration()
-matrix = hub75.Hub75Spi(config)
+matrix = matrixdata.MatrixData(ROW_SIZE, COL_SIZE)
+hub75spi = hub75.Hub75Spi(matrix, config)
 
 # Show Python Logo
-matrix.SetPixels(0, 16, logo)
+matrix.set_pixels(0, 16, logo)
     
 for i in range(100):
-    matrix.DisplayData()
+    hub75spi.DisplayData()
 
 # Show bouncing objects
 earth_bounce = bouncer.Bouncer(0, 0, len(earth), len(earth[0]), 63, 31, dx=2)
@@ -21,8 +26,9 @@ while True:
     earth_bounce.Update()
     saturn_bounce.Update()
     
-    matrix.ClearDirtyBytes()
-    matrix.SetPixels(earth_bounce.y, earth_bounce.x, earth)
-    matrix.SetPixels(saturn_bounce.y, saturn_bounce.x, saturn)
-    matrix.DisplayData()
+    matrix.clear_dirty_bytes()
+    matrix.set_pixels(earth_bounce.y, earth_bounce.x, earth)
+    matrix.set_pixels(saturn_bounce.y, saturn_bounce.x, saturn)
+    hub75spi.DisplayData()
+
 
