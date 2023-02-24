@@ -23,8 +23,8 @@ saturn_bounce = bouncer.Bouncer(20, 10, len(saturn), len(saturn[0]), 63, 31, dx=
 
 while True:
     
-    earth_bounce.Update()
-    saturn_bounce.Update()
+    earth_bounce.update()
+    saturn_bounce.update()
     
     matrix.clear_dirty_bytes()
     matrix.set_pixels(earth_bounce.y, earth_bounce.x, earth)

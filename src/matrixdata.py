@@ -1,3 +1,7 @@
+BLUE_VALUE = 1
+GREEN_VALUE = 2
+RED_VALUE = 4
+
 class MatrixData:
     def __init__(self, row_size, col_size):
         self.row_size = row_size
@@ -24,11 +28,11 @@ class MatrixData:
         cIndex = col // 8
         byteIndex = 7 - (col % 8)
 
-        if val & 4:
+        if val & RED_VALUE:
             self.red_matrix_data[row][cIndex] |= (1 << byteIndex)
-        if val & 2:
+        if val & GREEN_VALUE:
             self.green_matrix_data[row][cIndex] |= (1 << byteIndex)
-        if val & 1:
+        if val & BLUE_VALUE:
             self.blue_matrix_data[row][cIndex] |= (1 << byteIndex)
         
         self.dirty_bytes_array.append((row,col//8))
