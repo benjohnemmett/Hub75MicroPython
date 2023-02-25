@@ -15,7 +15,7 @@ hub75spi = hub75.Hub75Spi(matrix, config)
 matrix.set_pixels(0, 16, logo)
     
 for i in range(100):
-    hub75spi.DisplayData()
+    hub75spi.display_data()
 
 # Show bouncing objects
 earth_bounce = bouncer.Bouncer(0, 0, len(earth), len(earth[0]), 63, 31, dx=2)
@@ -29,6 +29,6 @@ while True:
     matrix.clear_dirty_bytes()
     matrix.set_pixels(earth_bounce.y, earth_bounce.x, earth)
     matrix.set_pixels(saturn_bounce.y, saturn_bounce.x, saturn)
-    hub75spi.DisplayData()
+    hub75spi.display_data()
 
 
