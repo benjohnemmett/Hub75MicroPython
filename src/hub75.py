@@ -53,13 +53,20 @@ class Hub75Spi:
         self.LineSelectCPin.off()
         self.LineSelectDPin.off()
         self.LineSelectEPin.off()
+
+        self.red1_mosi_pin = Pin(config.Red1PinNumber)
+        self.red2_mosi_pin = Pin(config.Red2PinNumber)
+        self.green1_mosi_pin = Pin(config.Green1PinNumber)
+        self.green2_mosi_pin = Pin(config.Green2PinNumber)
+        self.blue1_mosi_pin = Pin(config.Blue1PinNumber)
+        self.blue2_mosi_pin = Pin(config.Blue2PinNumber)
         
-        self.Red1Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=Pin(config.Red1PinNumber), miso=Pin(config.SpiMisoPinNumber))
-        self.Red2Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=Pin(config.Red2PinNumber), miso=Pin(config.SpiMisoPinNumber))
-        self.Green1Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=Pin(config.Green1PinNumber), miso=Pin(config.SpiMisoPinNumber))
-        self.Green2Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=Pin(config.Green2PinNumber), miso=Pin(config.SpiMisoPinNumber))
-        self.Blue1Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=Pin(config.Blue1PinNumber), miso=Pin(config.SpiMisoPinNumber))
-        self.Blue2Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=Pin(config.Blue2PinNumber), miso=Pin(config.SpiMisoPinNumber))
+        self.Red1Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=self.red1_mosi_pin, miso=Pin(config.SpiMisoPinNumber))
+        self.Red2Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=self.red2_mosi_pin, miso=Pin(config.SpiMisoPinNumber))
+        self.Green1Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=self.green1_mosi_pin, miso=Pin(config.SpiMisoPinNumber))
+        self.Green2Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=self.green2_mosi_pin, miso=Pin(config.SpiMisoPinNumber))
+        self.Blue1Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=self.blue1_mosi_pin, miso=Pin(config.SpiMisoPinNumber))
+        self.Blue2Spi = SoftSPI(baudrate=config.SpiBaudRate, polarity=1, phase=0, sck=Pin(config.ClockPinNumber), mosi=self.blue2_mosi_pin, miso=Pin(config.SpiMisoPinNumber))
         
     def SetRowSelect(self, row):
         self.LineSelectAPin.value(row & 1)
@@ -73,6 +80,7 @@ class Hub75Spi:
             # shift in data
             RowData = self.matrix_data.red_matrix_data[row]
             self.Red1Spi.write(RowData)
+            self.red1_mosi_pin.off()
             self.OutputEnablePin.on() # disable
 
             self.SetRowSelect(row)
@@ -85,6 +93,7 @@ class Hub75Spi:
             # shift in data
             RowData = self.matrix_data.green_matrix_data[row]
             self.Green1Spi.write(RowData)
+            self.green1_mosi_pin.off()
             self.OutputEnablePin.on() # disable
             self.LatchPin.on()
             self.LatchPin.off()
@@ -94,19 +103,19 @@ class Hub75Spi:
             # shift in data
             RowData = self.matrix_data.blue_matrix_data[row]
             self.Blue1Spi.write(RowData)
+            self.blue1_mosi_pin.off()
             self.OutputEnablePin.on() # disable
             self.LatchPin.on()
             self.LatchPin.off()
             self.OutputEnablePin.off() # enable
             sleep_us(self.config.IlluminationTimeMicroseconds)
-            
-        self.Blue1Spi.write(bytearray(8))
 
     def DisplayBottomHalf(self):
         for row in range(self.half_row_size, self.matrix_data.row_size):
             # shift in data
             RowData = self.matrix_data.red_matrix_data[row]
             self.Red2Spi.write(RowData)
+            self.red2_mosi_pin.off()
             self.OutputEnablePin.on() # disable
 
             self.SetRowSelect(row % self.half_row_size)
@@ -118,6 +127,7 @@ class Hub75Spi:
             
             RowData = self.matrix_data.green_matrix_data[row]
             self.Green2Spi.write(RowData)
+            self.green2_mosi_pin.off()
             self.OutputEnablePin.on() # disable
             self.LatchPin.on()
             self.LatchPin.off()
@@ -126,13 +136,12 @@ class Hub75Spi:
                         
             RowData = self.matrix_data.blue_matrix_data[row]
             self.Blue2Spi.write(RowData)
+            self.blue2_mosi_pin.off()
             self.OutputEnablePin.on() # disable
             self.LatchPin.on()
             self.LatchPin.off()
             self.OutputEnablePin.off() # enable
             sleep_us(self.config.IlluminationTimeMicroseconds)
-
-        self.Blue2Spi.write(bytearray(8))
 
     def DisplayData(self):
         self.DisplayTopHalf()
