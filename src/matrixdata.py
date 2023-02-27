@@ -24,9 +24,6 @@ class MatrixData:
         self.red_matrix_data = [bytearray(self.col_bytes) for x in range(self.row_size)]
         self.green_matrix_data = [bytearray(self.col_bytes) for x in range(self.row_size)]
         self.blue_matrix_data = [bytearray(self.col_bytes) for x in range(self.row_size)]
-        # self.red_matrix_data = [bytearray(self.col_bytes)] * self.row_size
-        # self.green_matrix_data = [bytearray(self.col_bytes)] * self.row_size
-        # self.blue_matrix_data = [bytearray(self.col_bytes)] * self.row_size
 
         self.dirty_bytes_array = []
 
@@ -131,8 +128,5 @@ class MatrixData:
         self.red_matrix_data = [bytearray(self.col_bytes) for x in range(self.row_size)]
         self.green_matrix_data = [bytearray(self.col_bytes) for x in range(self.row_size)]
         self.blue_matrix_data = [bytearray(self.col_bytes) for x in range(self.row_size)]
-        # self.red_matrix_data = [bytearray(self.col_bytes)] * self.row_size
-        # self.green_matrix_data = [bytearray(self.col_bytes)] * self.row_size
-        # self.blue_matrix_data = [bytearray(self.col_bytes)] * self.row_size
 
         self.dirty_bytes_array = []
