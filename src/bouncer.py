@@ -5,9 +5,9 @@ class Bouncer():
     Parameters
     ----------
     x : int
-        Initial x position (top row) of image.
+        Initial x position (left col) of image.
     y : int
-        Initial y position (left col) of image.
+        Initial y position (top row) of image.
     width : int
         Image width.
     height : int
