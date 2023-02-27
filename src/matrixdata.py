@@ -6,15 +6,15 @@ class MatrixData:
     '''
     RGB LED matrix data object for HUB75 LED displays.
     3-Bit Color Mapping:
-        Color	Binary Value 	Decimal Value
-        Black	0b000			0
-        Blue	0b001			1
-        Green	0b010			2
-        Cyan	0b011			3
-        Red		0b100			4
-        Magenta	0b101			5
-        Yellow	0b110			6
-        White	0b111			7
+        Color   Binary Value  Decimal Value
+        Black   0b000         0
+        Blue    0b001         1
+        Green   0b010         2
+        Cyan    0b011         3
+        Red     0b100         4
+        Magenta 0b101         5
+        Yellow  0b110         6
+        White   0b111         7
     '''
     def __init__(self, row_size, col_size):
         self.row_size = row_size
