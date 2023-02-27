@@ -18,11 +18,10 @@ for i in range(100):
     hub75spi.display_data()
 
 # Show bouncing objects
-earth_bounce = bouncer.Bouncer(0, 0, len(earth), len(earth[0]), 63, 31, dx=2)
-saturn_bounce = bouncer.Bouncer(20, 10, len(saturn), len(saturn[0]), 63, 31, dx=-2)
+earth_bounce = bouncer.Bouncer(0, 0, len(earth[0]), len(earth), COL_SIZE-1, ROW_SIZE-1, dx=2)
+saturn_bounce = bouncer.Bouncer(20, 10, len(saturn), len(saturn[0]), COL_SIZE-1, ROW_SIZE-1, dx=-2)
 
 while True:
-    
     earth_bounce.update()
     saturn_bounce.update()
     
@@ -30,5 +29,3 @@ while True:
     matrix.set_pixels(earth_bounce.y, earth_bounce.x, earth)
     matrix.set_pixels(saturn_bounce.y, saturn_bounce.x, saturn)
     hub75spi.display_data()
-
-

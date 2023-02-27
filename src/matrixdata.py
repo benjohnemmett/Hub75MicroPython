@@ -47,4 +47,3 @@ class MatrixData:
             self.blue_matrix_data[index[0]][index[1]] = 0
             
         self.dirty_bytes_array = []
-
