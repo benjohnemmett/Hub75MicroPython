@@ -19,7 +19,7 @@ for i in range(100):
 
 # Show bouncing objects
 earth_bounce = bouncer.Bouncer(0, 0, len(earth[0]), len(earth), COL_SIZE-1, ROW_SIZE-1, dx=2)
-saturn_bounce = bouncer.Bouncer(20, 10, len(saturn), len(saturn[0]), COL_SIZE-1, ROW_SIZE-1, dx=-2)
+saturn_bounce = bouncer.Bouncer(20, 10, len(saturn[0]), len(saturn), COL_SIZE-1, ROW_SIZE-1, dx=-2)
 
 while True:
     earth_bounce.update()
