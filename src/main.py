@@ -13,7 +13,7 @@ hub75spi = hub75.Hub75Spi(matrix, config)
 
 # Show Python Logo
 matrix.set_pixels(0, 16, logo)
-    
+
 for i in range(100):
     hub75spi.display_data()
 
@@ -24,7 +24,7 @@ saturn_bounce = bouncer.Bouncer(20, 10, len(saturn), len(saturn[0]), COL_SIZE-1,
 while True:
     earth_bounce.update()
     saturn_bounce.update()
-    
+
     matrix.clear_dirty_bytes()
     matrix.set_pixels(earth_bounce.y, earth_bounce.x, earth)
     matrix.set_pixels(saturn_bounce.y, saturn_bounce.x, saturn)

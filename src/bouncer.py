@@ -1,7 +1,7 @@
 class Bouncer():
     '''
     Bouncing image object.
-    
+
     Parameters
     ----------
     x : int

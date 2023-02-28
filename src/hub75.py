@@ -181,9 +181,9 @@ class Hub75Spi:
             self.latch_pin.off()
             self.output_enable_pin.off() # enable
             sleep_us(self.config.illumination_time_microseconds)
-        
-        #Flush out last blue line
-        self.blue2_spi.write(bytearray(8))
+
+        # flush out last blue line
+        self.blue2_spi.write(bytearray(self.matrix_data.col_bytes))
         self.output_enable_pin.on()
         self.latch_pin.on()
         self.latch_pin.off()
