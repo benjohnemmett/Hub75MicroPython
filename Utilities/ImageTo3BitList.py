@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import sys
+import os
 import numpy as np
 import cv2
 import argparse
@@ -16,6 +18,9 @@ class Configs:
 
         self.MAX_ROW_SIZE = 32
         self.MAX_COL_SIZE = 64
+
+        self.variable_name = "img"
+        self.output_file = "img_data.py"
 
 def GetReducedImageSize(img, configs):
     orig_rows = img.shape[0]
@@ -46,22 +51,23 @@ def ConvertImageTo3BitList(img, configs):
     return img_red + img_green + img_blue
 
 
-def PrintImageList(img):
-    print("[", end="")
+def PrintImageList(img, out=sys.stdout):
+    out.write("[")
     for row in range(img.shape[0]-1):
-        print("[", end="")
+        out.write("[")
         for col in range(img.shape[1]-1):
-            print("{}, ".format(img[row, col]), end="")
-        print("{}],".format(img[row, col]))
+            out.write("{}, ".format(img[row, col]))
+        out.write("{}],\n".format(img[row, col]))
     
-    print("[", end="")
+    out.write("[")
     for col in range(img.shape[1]-1):
-        print("{}, ".format(img[-1, col]), end="")
-    print("{}]]".format(img[-1, col]))
+        out.write("{}, ".format(img[-1, col]))
+    out.write("{}]]\n\n".format(img[-1, col]))
 
 
 def ConvertImage(image, configs):
     print("Reading image {}...".format(image))
+
     img = cv2.imread(image)
 
     print(" -> size {}".format(img.shape))
@@ -73,16 +79,41 @@ def ConvertImage(image, configs):
 
     img_out = ConvertImageTo3BitList(img_reduced, configs)
 
-    PrintImageList(img_out)
-
     return img_out
+
+
+def run(image_path, configs):
+
+    with open(configs.output_file, "wt") as out_file:
+        if os.path.isdir(image_path):
+            files_in_dir = [f for f in os.listdir(image_path) if os.path.isfile(os.path.join(image_path, f))]
+            files_in_dir.sort()
+
+            out_file.write(f"{configs.variable_name} = [\n")
+            for file in files_in_dir:
+                if not file.endswith((".png", ".jpg", "jpeg")):
+                    continue
+                file_path = os.path.join(image_path, file)
+                print(f"Reading file {file_path}")
+                img_out = ConvertImage(file_path, configs)
+
+                PrintImageList(img_out, out=out_file)
+                out_file.write(f",\n")
+
+            out_file.write(f"]\n")
+        else:
+            out_file.write(f"{configs.variable_name} = ")
+            img_out = ConvertImage(image_path, configs)
+            PrintImageList(img_out, out=out_file)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Convert an image to a 2D list of 3-bit mapped values.")
-    parser.add_argument("-i", "--image")
+    parser.add_argument("-i", "--image", help="Full path to an image file or directory of image files to be encoded.")
     parser.add_argument("-r", "--rows", type=int, default=32, required=False)
     parser.add_argument("-c", "--cols", type=int, default=64, required=False)
+    parser.add_argument("-n", "--var_name", default="img")
+    parser.add_argument("-o", "--output_file", default="img_data.py")
     parser.add_argument("--red_thresh", type=int, default=127, required=False)
     args = parser.parse_args()
     print(args)
@@ -91,8 +122,10 @@ def main():
     configs.MAX_COL_SIZE = args.cols
     configs.MAX_ROW_SIZE = args.rows
     configs.RED_THRESHOLD = args.red_thresh
+    configs.variable_name = args.var_name
+    configs.output_file = args.output_file
 
-    ConvertImage(args.image, configs)
+    run(args.image, configs)
 
 
 if __name__ == "__main__":
